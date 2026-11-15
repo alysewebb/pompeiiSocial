@@ -8,12 +8,15 @@ import { render } from 'react-testing-library';
 import HomePage from '../index';
 
 describe('<HomePage />', () => {
-  it('should render an ascii narwhal and none of the boilerplate copy', () => {
-    const { getByRole, queryByText } = render(<HomePage />);
-    const art = getByRole('img', { name: 'An ASCII art narwhal' });
+  it('should render a scrollable feed of posts', () => {
+    const { getAllByText, getByText } = render(<HomePage />);
 
-    expect(art.textContent).toContain('\\\\');
-    expect(queryByText(/react project/i)).toBeNull();
-    expect(queryByText(/github repositories/i)).toBeNull();
+    expect(
+      getByText('Took the long way home. Always take the long way home.'),
+    ).toBeTruthy();
+    expect(
+      getAllByText('This is exactly why I’m here. More of this, please.'),
+    ).toHaveLength(2);
+    expect(getByText('Discover')).toBeTruthy();
   });
 });

@@ -52,7 +52,7 @@ NewPostButton.defaultProps = {
 
 export default function HomePage() {
   const [language, setLanguage] = useState('English');
-  const [languageOpen, setLanguageOpen] = useState(true);
+  const [languageOpen, setLanguageOpen] = useState(false);
   const [newPostOpen, setNewPostOpen] = useState(false);
   const closeNewPost = useCallback(() => setNewPostOpen(false), []);
   const openNewPost = useCallback(() => setNewPostOpen(true), []);
@@ -90,7 +90,10 @@ export default function HomePage() {
                     type="button"
                     role="option"
                     aria-selected={name === language}
-                    onClick={() => setLanguage(name)}
+                    onClick={() => {
+                      setLanguage(name);
+                      setLanguageOpen(false);
+                    }}
                   >
                     {name}
                     {name === language && <img src={selectedIcon} alt="" />}

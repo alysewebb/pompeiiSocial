@@ -125,3 +125,30 @@
   line-height: normal;
   color: #687787;
 }
+
+@media (min-width: 1301px) {
+  .post {
+    padding: 16px;
+  }
+
+  .post-content {
+    gap: 12px;
+  }
+
+  .post-body {
+    gap: 8px;
+  }
+
+  .post-location {
+    align-items: baseline;
+  }
+
+  .post-text {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .post-photo {
+    height: 309px;
+  }
+}

@@ -2,26 +2,83 @@
  * HomePage
  *
  * The main feed: a fixed header and a scrollable list of posts.
+ * At 1301px and up, the logo moves into a left column and search
+ * plus trending tags appear on the right.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 
 import Post from 'components/Post';
 import menuIcon from '../../images/feed/menu.svg';
 import snakeIcon from '../../images/feed/snake.svg';
+import snakeDesktopIcon from '../../images/feed/snake-desktop.svg';
 import searchIcon from '../../images/feed/search.svg';
+import searchFieldIcon from '../../images/feed/search-field.svg';
 import hashIcon from '../../images/feed/hash.svg';
 import composeIcon from '../../images/feed/compose.svg';
+import globeIcon from '../../images/feed/globe.svg';
+import expandIcon from '../../images/feed/expand.svg';
+import selectedIcon from '../../images/feed/selected.svg';
+import squarePenIcon from '../../images/feed/square-pen.svg';
 import posts from './posts';
 import './index.css';
 
+const languages = ['English', 'Latin'];
+const tags = ['Gladiators', 'Fast Food', 'Senators', 'Weather', 'Greetings'];
+
 export default function HomePage() {
+  const [language, setLanguage] = useState('English');
+  const [languageOpen, setLanguageOpen] = useState(true);
+
   return (
     <main className="screen">
       <Helmet titleTemplate="%s" defaultTitle="Discover">
         <title>Discover</title>
       </Helmet>
+      <aside className="rail">
+        <img src={snakeDesktopIcon} alt="" />
+        <h1 className="brand-title">Conversations from Pompeii</h1>
+        <div className="language">
+          <button
+            className="language-trigger"
+            type="button"
+            aria-expanded={languageOpen}
+            aria-haspopup="listbox"
+            onClick={() => setLanguageOpen(open => !open)}
+          >
+            <img className="language-globe" src={globeIcon} alt="" />
+            <span className="language-label">{language}</span>
+            <img className="language-expand" src={expandIcon} alt="" />
+          </button>
+          {languageOpen && (
+            <ul className="language-menu" role="listbox" aria-label="Language">
+              {languages.map(name => (
+                <li key={name}>
+                  <button
+                    className={
+                      name === language
+                        ? 'language-option language-option--selected'
+                        : 'language-option'
+                    }
+                    type="button"
+                    role="option"
+                    aria-selected={name === language}
+                    onClick={() => setLanguage(name)}
+                  >
+                    {name}
+                    {name === language && <img src={selectedIcon} alt="" />}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <button className="new-post" type="button">
+          <img src={squarePenIcon} alt="" />
+          New post
+        </button>
+      </aside>
       <div className="phone">
         <header className="header">
           <div className="controls">
@@ -76,6 +133,27 @@ export default function HomePage() {
           <img src={composeIcon} alt="" />
         </button>
       </div>
+      <aside className="sidebar">
+        <label className="search">
+          <img src={searchFieldIcon} alt="" />
+          <input
+            className="search-input"
+            type="search"
+            placeholder="Search"
+            aria-label="Search"
+          />
+        </label>
+        <h2 className="trending-title">Trending</h2>
+        <div className="tags">
+          {tags.map(tag => (
+            <button className="tag" key={tag} type="button">
+              {tag}
+            </button>
+          ))}
+        </div>
+        <div className="sidebar-divider" />
+        <p className="sidebar-links">About&nbsp;&nbsp;·&nbsp;&nbsp;Contact</p>
+      </aside>
     </main>
   );
 }

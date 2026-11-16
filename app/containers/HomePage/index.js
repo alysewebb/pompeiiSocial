@@ -6,9 +6,11 @@
  * plus trending tags appear on the right.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 
+import NewPostDialog from 'components/NewPostDialog';
 import Post from 'components/Post';
 import menuIcon from '../../images/feed/menu.svg';
 import snakeIcon from '../../images/feed/snake.svg';
@@ -16,7 +18,6 @@ import snakeDesktopIcon from '../../images/feed/snake-desktop.svg';
 import searchIcon from '../../images/feed/search.svg';
 import searchFieldIcon from '../../images/feed/search-field.svg';
 import hashIcon from '../../images/feed/hash.svg';
-import composeIcon from '../../images/feed/compose.svg';
 import globeIcon from '../../images/feed/globe.svg';
 import expandIcon from '../../images/feed/expand.svg';
 import selectedIcon from '../../images/feed/selected.svg';
@@ -27,9 +28,34 @@ import './index.css';
 const languages = ['English', 'Latin'];
 const tags = ['Gladiators', 'Fast Food', 'Senators', 'Weather', 'Greetings'];
 
+function NewPostButton({ fab, onClick }) {
+  return (
+    <button
+      className={fab ? 'new-post new-post--fab' : 'new-post'}
+      type="button"
+      onClick={onClick}
+    >
+      <img src={squarePenIcon} alt="" />
+      <span className="new-post-label">New post</span>
+    </button>
+  );
+}
+
+NewPostButton.propTypes = {
+  fab: PropTypes.bool,
+  onClick: PropTypes.func.isRequired,
+};
+
+NewPostButton.defaultProps = {
+  fab: false,
+};
+
 export default function HomePage() {
   const [language, setLanguage] = useState('English');
   const [languageOpen, setLanguageOpen] = useState(true);
+  const [newPostOpen, setNewPostOpen] = useState(false);
+  const closeNewPost = useCallback(() => setNewPostOpen(false), []);
+  const openNewPost = useCallback(() => setNewPostOpen(true), []);
 
   return (
     <main className="screen">
@@ -74,10 +100,7 @@ export default function HomePage() {
             </ul>
           )}
         </div>
-        <button className="new-post" type="button">
-          <img src={squarePenIcon} alt="" />
-          New post
-        </button>
+        <NewPostButton onClick={openNewPost} />
       </aside>
       <div className="phone">
         <header className="header">
@@ -129,9 +152,7 @@ export default function HomePage() {
             />
           ))}
         </div>
-        <button className="compose" type="button" aria-label="Compose post">
-          <img src={composeIcon} alt="" />
-        </button>
+        <NewPostButton fab onClick={openNewPost} />
       </div>
       <aside className="sidebar">
         <label className="search">
@@ -154,6 +175,7 @@ export default function HomePage() {
         <div className="sidebar-divider" />
         <p className="sidebar-links">About&nbsp;&nbsp;·&nbsp;&nbsp;Contact</p>
       </aside>
+      {newPostOpen && <NewPostDialog onClose={closeNewPost} />}
     </main>
   );
 }

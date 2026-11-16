@@ -145,8 +145,7 @@ export default function HomePage() {
           {posts.map(post => (
             <Post
               key={post.id}
-              location={post.location}
-              text={post.text}
+              graffiti={post.graffiti}
               image={post.image}
               imageAlt={post.imageAlt}
               comments={post.comments}

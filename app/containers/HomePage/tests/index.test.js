@@ -11,12 +11,9 @@ describe('<HomePage />', () => {
   it('should render a scrollable feed of posts', () => {
     const { getAllByText, getByText } = render(<HomePage />);
 
-    expect(
-      getByText('Took the long way home. Always take the long way home.'),
-    ).toBeTruthy();
-    expect(
-      getAllByText('This is exactly why I’m here. More of this, please.'),
-    ).toHaveLength(2);
+    expect(getByText('Fab(ius)')).toBeTruthy();
+    expect(getByText('Herculaneum, House of the Bicentenary')).toBeTruthy();
+    expect(getAllByText('Herculaneum, Cardo IV').length).toBeGreaterThan(0);
     expect(getByText('Discover')).toBeTruthy();
   });
 });

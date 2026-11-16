@@ -37,7 +37,19 @@ Action.defaultProps = {
   count: null,
 };
 
-function Post({ location, text, image, imageAlt, comments, likes, avatar }) {
+function postLocation(graffiti) {
+  const city = graffiti.property.insula.city.name;
+  const propertyName = graffiti.property.englishPropertyName;
+  const streetName =
+    graffiti.segment &&
+    graffiti.segment.street &&
+    graffiti.segment.street.streetName;
+  const place = propertyName || streetName;
+
+  return place ? `${city}, ${place}` : city;
+}
+
+function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
   return (
     <article className="post">
       <div className="post-content">
@@ -52,9 +64,9 @@ function Post({ location, text, image, imageAlt, comments, likes, avatar }) {
         <div className="post-body">
           <div className="post-location">
             <img src={pin} alt="" />
-            <p className="post-location-name">{location}</p>
+            <p className="post-location-name">{postLocation(graffiti)}</p>
           </div>
-          <p className="post-text">{text}</p>
+          <p className="post-text">{graffiti.contentTranslation}</p>
           {image && <img className="post-photo" src={image} alt={imageAlt} />}
           <div className="post-actions">
             <div className="post-action-group">
@@ -71,8 +83,22 @@ function Post({ location, text, image, imageAlt, comments, likes, avatar }) {
 }
 
 Post.propTypes = {
-  location: PropTypes.string.isRequired,
-  text: PropTypes.string.isRequired,
+  graffiti: PropTypes.shape({
+    contentTranslation: PropTypes.string.isRequired,
+    property: PropTypes.shape({
+      englishPropertyName: PropTypes.string,
+      insula: PropTypes.shape({
+        city: PropTypes.shape({
+          name: PropTypes.string.isRequired,
+        }).isRequired,
+      }).isRequired,
+    }).isRequired,
+    segment: PropTypes.shape({
+      street: PropTypes.shape({
+        streetName: PropTypes.string,
+      }),
+    }),
+  }).isRequired,
   image: PropTypes.string,
   imageAlt: PropTypes.string,
   comments: PropTypes.number.isRequired,

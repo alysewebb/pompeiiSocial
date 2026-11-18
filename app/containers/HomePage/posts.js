@@ -34,11 +34,45 @@ const avatars = [
 const commentCounts = [12, 28, 6, 14];
 const likeCounts = [186, 642, 93, 128];
 
+function isDrawingCaption(caption) {
+  return typeof caption === 'string' && /drawing/i.test(caption);
+}
+
+function englishDescription(item) {
+  if (typeof item.descriptionInEnglish === 'string') {
+    return item.descriptionInEnglish;
+  }
+
+  const nested = item.figuralInfo && item.figuralInfo.descriptionInEnglish;
+  return typeof nested === 'string' ? nested : '';
+}
+
+function firstImage(item) {
+  const described = englishDescription(item) !== '';
+  if (
+    (!isDrawingCaption(item.caption) && !described) ||
+    !item.photos ||
+    !item.photos.length
+  ) {
+    return null;
+  }
+
+  const photo = item.photos[0];
+  return photo.imagePath || photo.thumbPath || null;
+}
+
 const posts = graffiti
-  .filter(item => item.contentTranslation)
+  .filter(
+    item =>
+      item.contentTranslation ||
+      isDrawingCaption(item.caption) ||
+      englishDescription(item),
+  )
   .map((item, index) => ({
     id: item.agpId || index,
     graffiti: item,
+    image: firstImage(item),
+    imageAlt: item.caption || englishDescription(item),
     comments: commentCounts[index % commentCounts.length],
     likes: likeCounts[index % likeCounts.length],
     avatar: avatars[index % avatars.length],

@@ -49,7 +49,38 @@ function postLocation(graffiti) {
   return place ? `${city}, ${place}` : city;
 }
 
+function drawingCaption(caption) {
+  return typeof caption === 'string' && /drawing/i.test(caption)
+    ? caption
+    : null;
+}
+
+function tallyCaption(caption) {
+  return typeof caption === 'string' && /tally/i.test(caption) ? caption : null;
+}
+
+function englishDescription(graffiti) {
+  if (typeof graffiti.descriptionInEnglish === 'string') {
+    return graffiti.descriptionInEnglish;
+  }
+
+  const nested =
+    graffiti.figuralInfo && graffiti.figuralInfo.descriptionInEnglish;
+  return typeof nested === 'string' ? nested : '';
+}
+
+function longerCaption(graffiti) {
+  const caption = typeof graffiti.caption === 'string' ? graffiti.caption : '';
+  const description = englishDescription(graffiti);
+
+  return description.length > caption.length ? description : caption;
+}
+
 function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
+  const tally = tallyCaption(graffiti.caption);
+  const imageLabel = image ? longerCaption(graffiti) : '';
+  const caption = imageLabel || drawingCaption(graffiti.caption);
+
   return (
     <article className="post">
       <div className="post-content">
@@ -66,8 +97,20 @@ function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
             <img src={pin} alt="" />
             <p className="post-location-name">{postLocation(graffiti)}</p>
           </div>
-          <p className="post-text">{graffiti.contentTranslation}</p>
-          {image && <img className="post-photo" src={image} alt={imageAlt} />}
+          {(graffiti.contentTranslation || tally) && (
+            <p className="post-text">
+              {graffiti.contentTranslation}
+              {tally && <em className="post-tally"> ({tally})</em>}
+            </p>
+          )}
+          {image && (
+            <img
+              className="post-photo"
+              src={image}
+              alt={imageLabel || imageAlt}
+            />
+          )}
+          {caption && <p className="post-caption">{caption}</p>}
           <div className="post-actions">
             <div className="post-action-group">
               <Action icon={commentIcon} label="Replies" count={comments} />
@@ -84,7 +127,12 @@ function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
 
 Post.propTypes = {
   graffiti: PropTypes.shape({
-    contentTranslation: PropTypes.string.isRequired,
+    contentTranslation: PropTypes.string,
+    caption: PropTypes.string,
+    descriptionInEnglish: PropTypes.string,
+    figuralInfo: PropTypes.shape({
+      descriptionInEnglish: PropTypes.string,
+    }),
     property: PropTypes.shape({
       englishPropertyName: PropTypes.string,
       insula: PropTypes.shape({

@@ -26,7 +26,83 @@ import posts from './posts';
 import './index.css';
 
 const languages = ['English', 'Latin'];
-const tags = ['Gladiators', 'Fast Food', 'Senators', 'Weather', 'Greetings'];
+
+function drawingTagNames(post) {
+  const drawingTags =
+    post.graffiti.figuralInfo && post.graffiti.figuralInfo.drawingTags;
+
+  if (!Array.isArray(drawingTags)) {
+    return [];
+  }
+
+  return drawingTags
+    .map(tag => (tag && typeof tag.name === 'string' ? tag.name : ''))
+    .filter(Boolean);
+}
+
+function propertyName(post) {
+  const name = post.graffiti.property && post.graffiti.property.propertyName;
+  return typeof name === 'string' ? name : '';
+}
+
+function byCount(counts) {
+  return [...counts.keys()].sort(
+    (a, b) => counts.get(b) - counts.get(a) || a.localeCompare(b),
+  );
+}
+
+const hiddenProperties = new Set(['Not found']);
+
+function trendingTags(items) {
+  const drawingCounts = new Map();
+  const propertyCounts = new Map();
+
+  items.forEach(post => {
+    drawingTagNames(post).forEach(name => {
+      if (name === 'Other') {
+        return;
+      }
+
+      drawingCounts.set(name, (drawingCounts.get(name) || 0) + 1);
+    });
+
+    const place = propertyName(post);
+    if (place && !hiddenProperties.has(place)) {
+      propertyCounts.set(place, (propertyCounts.get(place) || 0) + 1);
+    }
+  });
+
+  return [
+    ...byCount(drawingCounts).map(label => ({ label, kind: 'drawing' })),
+    ...byCount(propertyCounts)
+      .filter(label => propertyCounts.get(label) >= 10)
+      .map(label => ({ label, kind: 'property' })),
+  ];
+}
+
+function postText(post) {
+  return typeof post.graffiti.contentTranslation === 'string'
+    ? post.graffiti.contentTranslation
+    : '';
+}
+
+function isGreeting(post) {
+  return /\b(Greetings?|Hello)\b/i.test(postText(post));
+}
+
+function postMatchesTag(post, tag) {
+  if (tag.kind === 'greeting') {
+    return isGreeting(post);
+  }
+
+  if (tag.kind === 'drawing') {
+    return drawingTagNames(post).includes(tag.label);
+  }
+
+  return propertyName(post) === tag.label;
+}
+
+const tags = [{ label: 'Greetings', kind: 'greeting' }, ...trendingTags(posts)];
 
 function NewPostButton({ fab, onClick }) {
   return (
@@ -54,8 +130,12 @@ export default function HomePage() {
   const [language, setLanguage] = useState('English');
   const [languageOpen, setLanguageOpen] = useState(false);
   const [newPostOpen, setNewPostOpen] = useState(false);
+  const [activeTag, setActiveTag] = useState(null);
   const closeNewPost = useCallback(() => setNewPostOpen(false), []);
   const openNewPost = useCallback(() => setNewPostOpen(true), []);
+  const visiblePosts = activeTag
+    ? posts.filter(post => postMatchesTag(post, activeTag))
+    : posts;
 
   return (
     <main className="screen">
@@ -142,7 +222,7 @@ export default function HomePage() {
           </div>
         </header>
         <div className="feed">
-          {posts.map(post => (
+          {visiblePosts.map(post => (
             <Post
               key={post.id}
               graffiti={post.graffiti}
@@ -168,11 +248,24 @@ export default function HomePage() {
         </label>
         <h2 className="trending-title">Trending</h2>
         <div className="tags">
-          {tags.map(tag => (
-            <button className="tag" key={tag} type="button">
-              {tag}
-            </button>
-          ))}
+          {tags.map(tag => {
+            const selected =
+              activeTag &&
+              activeTag.kind === tag.kind &&
+              activeTag.label === tag.label;
+
+            return (
+              <button
+                className={selected ? 'tag tag--selected' : 'tag'}
+                key={`${tag.kind}:${tag.label}`}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setActiveTag(selected ? null : tag)}
+              >
+                {tag.label}
+              </button>
+            );
+          })}
         </div>
         <div className="sidebar-divider" />
         <p className="sidebar-links">About&nbsp;&nbsp;·&nbsp;&nbsp;Contact</p>

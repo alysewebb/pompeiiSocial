@@ -383,6 +383,12 @@
     color: #000;
   }
 
+  .tag--selected {
+    border-color: #900000;
+    background: #900000;
+    color: #fff;
+  }
+
   .sidebar-divider {
     width: 100%;
     height: 1px;

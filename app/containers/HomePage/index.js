@@ -22,6 +22,7 @@ import globeIcon from '../../images/feed/globe.svg';
 import expandIcon from '../../images/feed/expand.svg';
 import selectedIcon from '../../images/feed/selected.svg';
 import squarePenIcon from '../../images/feed/square-pen.svg';
+import homeIcon from '../../images/feed/home.svg';
 import posts from './posts';
 import './index.css';
 
@@ -118,6 +119,53 @@ const tags = [
   ...trendingTags(posts),
 ];
 
+function LanguageSelect({ language, open, onToggle, onSelect }) {
+  return (
+    <div className="language">
+      <button
+        className="language-trigger"
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        onClick={onToggle}
+      >
+        <img className="language-globe" src={globeIcon} alt="" />
+        <span className="language-label">{language}</span>
+        <img className="language-expand" src={expandIcon} alt="" />
+      </button>
+      {open && (
+        <ul className="language-menu" role="listbox" aria-label="Language">
+          {languages.map(name => (
+            <li key={name}>
+              <button
+                className={
+                  name === language
+                    ? 'language-option language-option--selected'
+                    : 'language-option'
+                }
+                type="button"
+                role="option"
+                aria-selected={name === language}
+                onClick={() => onSelect(name)}
+              >
+                {name}
+                {name === language && <img src={selectedIcon} alt="" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+LanguageSelect.propTypes = {
+  language: PropTypes.string.isRequired,
+  open: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
+};
+
 function NewPostButton({ fab, onClick }) {
   return (
     <button
@@ -145,8 +193,18 @@ export default function HomePage() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const [newPostOpen, setNewPostOpen] = useState(false);
   const [activeTag, setActiveTag] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const closeNewPost = useCallback(() => setNewPostOpen(false), []);
   const openNewPost = useCallback(() => setNewPostOpen(true), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const toggleLanguage = useCallback(
+    () => setLanguageOpen(open => !open),
+    [],
+  );
+  const selectLanguage = useCallback(name => {
+    setLanguage(name);
+    setLanguageOpen(false);
+  }, []);
   const visiblePosts = activeTag
     ? posts.filter(post => postMatchesTag(post, activeTag))
     : posts;
@@ -159,50 +217,24 @@ export default function HomePage() {
       <aside className="rail">
         <img src={snakeDesktopIcon} alt="" />
         <h1 className="brand-title">Conversations from Pompeii</h1>
-        <div className="language">
-          <button
-            className="language-trigger"
-            type="button"
-            aria-expanded={languageOpen}
-            aria-haspopup="listbox"
-            onClick={() => setLanguageOpen(open => !open)}
-          >
-            <img className="language-globe" src={globeIcon} alt="" />
-            <span className="language-label">{language}</span>
-            <img className="language-expand" src={expandIcon} alt="" />
-          </button>
-          {languageOpen && (
-            <ul className="language-menu" role="listbox" aria-label="Language">
-              {languages.map(name => (
-                <li key={name}>
-                  <button
-                    className={
-                      name === language
-                        ? 'language-option language-option--selected'
-                        : 'language-option'
-                    }
-                    type="button"
-                    role="option"
-                    aria-selected={name === language}
-                    onClick={() => {
-                      setLanguage(name);
-                      setLanguageOpen(false);
-                    }}
-                  >
-                    {name}
-                    {name === language && <img src={selectedIcon} alt="" />}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <LanguageSelect
+          language={language}
+          open={languageOpen}
+          onToggle={toggleLanguage}
+          onSelect={selectLanguage}
+        />
         <NewPostButton onClick={openNewPost} />
       </aside>
       <div className="phone">
         <header className="header">
           <div className="controls">
-            <button className="icon-button" type="button" aria-label="Menu">
+            <button
+              className="icon-button"
+              type="button"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(true)}
+            >
               <img src={menuIcon} alt="" />
             </button>
             <img src={snakeIcon} alt="" />
@@ -250,6 +282,56 @@ export default function HomePage() {
           ))}
         </div>
         <NewPostButton fab onClick={openNewPost} />
+        <div className={menuOpen ? 'nav-drawer nav-drawer--open' : 'nav-drawer'}>
+          <button
+            className="nav-drawer__scrim"
+            type="button"
+            aria-label="Close menu"
+            tabIndex={menuOpen ? 0 : -1}
+            onClick={closeMenu}
+          />
+          <div
+            className="nav-drawer__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+            aria-hidden={!menuOpen}
+          >
+            <div className="nav-drawer__content">
+              <button
+                className="nav-drawer__logo"
+                type="button"
+                aria-label="Close menu"
+                onClick={closeMenu}
+              >
+                <img src={snakeDesktopIcon} alt="" />
+              </button>
+              <p className="brand-title">Conversations from Pompeii</p>
+              <LanguageSelect
+                language={language}
+                open={languageOpen}
+                onToggle={toggleLanguage}
+                onSelect={selectLanguage}
+              />
+              <div className="nav-drawer__divider" />
+              <button className="nav-drawer__item" type="button">
+                <img src={homeIcon} alt="" />
+                <span>Home</span>
+              </button>
+              <button className="nav-drawer__item" type="button">
+                <img src={hashIcon} alt="" />
+                <span>Feeds</span>
+              </button>
+              <button className="nav-drawer__item" type="button">
+                <img src={searchIcon} alt="" />
+                <span>Explore</span>
+              </button>
+              <div className="nav-drawer__divider" />
+              <p className="nav-drawer__meta">About</p>
+              <p className="nav-drawer__meta">Contact</p>
+            </div>
+          </div>
+        </div>
       </div>
       <aside className="sidebar">
         <label className="search">

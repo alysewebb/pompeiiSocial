@@ -245,6 +245,7 @@ export default function HomePage() {
               comments={post.comments}
               likes={post.likes}
               avatar={post.avatar}
+              language={language}
             />
           ))}
         </div>

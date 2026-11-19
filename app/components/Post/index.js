@@ -76,10 +76,42 @@ function longerCaption(graffiti) {
   return description.length > caption.length ? description : caption;
 }
 
-function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
+function decodeEntities(value) {
+  return value.replace(/&#(\d+);|&#x([0-9a-fA-F]+);/g, (_, decimal, hex) =>
+    String.fromCodePoint(hex ? parseInt(hex, 16) : parseInt(decimal, 10)),
+  );
+}
+
+function inscription(graffiti) {
+  return typeof graffiti.content === 'string'
+    ? decodeEntities(graffiti.content)
+    : '';
+}
+
+function latinDescription(graffiti) {
+  if (typeof graffiti.descriptionInLatin === 'string') {
+    return graffiti.descriptionInLatin;
+  }
+
+  const nested =
+    graffiti.figuralInfo && graffiti.figuralInfo.descriptionInLatin;
+  return typeof nested === 'string' ? nested : '';
+}
+
+function Post({ graffiti, image, imageAlt, comments, likes, avatar, language }) {
   const tally = tallyCaption(graffiti.caption);
   const imageLabel = image ? longerCaption(graffiti) : '';
-  const caption = imageLabel || drawingCaption(graffiti.caption);
+  let caption = imageLabel || drawingCaption(graffiti.caption);
+  const latinCaption = latinDescription(graffiti);
+
+  if (language === 'Latin' && image && caption && latinCaption) {
+    caption = latinCaption;
+  }
+
+  const text =
+    language === 'Latin' && graffiti.contentTranslation
+      ? inscription(graffiti)
+      : graffiti.contentTranslation;
 
   return (
     <article className="post">
@@ -97,9 +129,13 @@ function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
             <img src={pin} alt="" />
             <p className="post-location-name">{postLocation(graffiti)}</p>
           </div>
-          {(graffiti.contentTranslation || tally) && (
-            <p className="post-text">
-              {graffiti.contentTranslation}
+          {(text || tally) && (
+            <p
+              className={
+                language === 'Latin' ? 'post-text post-text--latin' : 'post-text'
+              }
+            >
+              {text}
               {tally && <em className="post-tally"> ({tally})</em>}
             </p>
           )}
@@ -107,7 +143,11 @@ function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
             <img
               className="post-photo"
               src={image}
-              alt={imageLabel || imageAlt}
+              alt={
+                language === 'Latin' && image && caption && latinCaption
+                  ? caption
+                  : imageLabel || imageAlt
+              }
             />
           )}
           {caption && <p className="post-caption">{caption}</p>}
@@ -127,11 +167,14 @@ function Post({ graffiti, image, imageAlt, comments, likes, avatar }) {
 
 Post.propTypes = {
   graffiti: PropTypes.shape({
+    content: PropTypes.string,
     contentTranslation: PropTypes.string,
     caption: PropTypes.string,
     descriptionInEnglish: PropTypes.string,
+    descriptionInLatin: PropTypes.string,
     figuralInfo: PropTypes.shape({
       descriptionInEnglish: PropTypes.string,
+      descriptionInLatin: PropTypes.string,
     }),
     property: PropTypes.shape({
       englishPropertyName: PropTypes.string,
@@ -156,11 +199,13 @@ Post.propTypes = {
     silhouette: PropTypes.string.isRequired,
     placement: PropTypes.oneOf(['bun', 'profile', 'veil', 'beard']).isRequired,
   }).isRequired,
+  language: PropTypes.oneOf(['English', 'Latin']),
 };
 
 Post.defaultProps = {
   image: null,
   imageAlt: '',
+  language: 'English',
 };
 
 export default Post;

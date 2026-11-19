@@ -85,6 +85,10 @@
   color: #101820;
 }
 
+.post-text--latin {
+  white-space: pre-wrap;
+}
+
 .post-tally {
   font-style: italic;
 }

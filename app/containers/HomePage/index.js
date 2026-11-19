@@ -73,7 +73,9 @@ function trendingTags(items) {
   });
 
   return [
-    ...byCount(drawingCounts).map(label => ({ label, kind: 'drawing' })),
+    ...byCount(drawingCounts)
+      .filter(label => drawingCounts.get(label) >= 8)
+      .map(label => ({ label, kind: 'drawing' })),
     ...byCount(propertyCounts)
       .filter(label => propertyCounts.get(label) >= 10)
       .map(label => ({ label, kind: 'property' })),
@@ -90,9 +92,17 @@ function isGreeting(post) {
   return /\b(Greetings?|Hello)\b/i.test(postText(post));
 }
 
+function isFarewell(post) {
+  return /\b(Farewell|Goodbye)\b/i.test(postText(post));
+}
+
 function postMatchesTag(post, tag) {
   if (tag.kind === 'greeting') {
     return isGreeting(post);
+  }
+
+  if (tag.kind === 'farewell') {
+    return isFarewell(post);
   }
 
   if (tag.kind === 'drawing') {
@@ -102,7 +112,11 @@ function postMatchesTag(post, tag) {
   return propertyName(post) === tag.label;
 }
 
-const tags = [{ label: 'Greetings', kind: 'greeting' }, ...trendingTags(posts)];
+const tags = [
+  { label: 'Greetings', kind: 'greeting' },
+  { label: 'Farewells', kind: 'farewell' },
+  ...trendingTags(posts),
+];
 
 function NewPostButton({ fab, onClick }) {
   return (

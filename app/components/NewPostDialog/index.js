@@ -11,6 +11,12 @@ import eruptionMobile from '../../images/feed/eruption-mobile.svg';
 import eruptionDesktop from '../../images/feed/eruption-desktop.svg';
 import './index.css';
 
+const ERUPTION_YEAR = 79;
+
+function yearsSinceEruption(date = new Date()) {
+  return date.getFullYear() - ERUPTION_YEAR;
+}
+
 export default function NewPostDialog({ onClose }) {
   const closeButton = useRef(null);
 
@@ -56,7 +62,8 @@ export default function NewPostDialog({ onClose }) {
             Oops!
           </h2>
           <p className="new-post-message">
-            You’re 1,947 years too late to post here.
+            You’re {yearsSinceEruption().toLocaleString('en-US')} years too
+            late to post here.
           </p>
           <button
             className="new-post-ok"

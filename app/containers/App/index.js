@@ -40,7 +40,6 @@ function AppShell() {
       <Header />
       <Switch>
         <Route path="/features" component={FeaturePage} />
-        <Route component={NotFoundPage} />
       </Switch>
       <Footer />
     </AppWrapper>
@@ -53,7 +52,8 @@ export default function App() {
       <GlobalStyle />
       <Switch>
         <Route exact path="/" component={HomePage} />
-        <Route component={AppShell} />
+        <Route path="/features" component={AppShell} />
+        <Route component={NotFoundPage} />
       </Switch>
     </>
   );

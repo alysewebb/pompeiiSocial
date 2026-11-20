@@ -6,17 +6,18 @@
  * plus trending tags appear on the right.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 
 import NewPostDialog from 'components/NewPostDialog';
 import Post from 'components/Post';
+import ExplorePage, { SearchEmpty, SearchField } from 'containers/ExplorePage';
+import history from 'utils/history';
 import menuIcon from '../../images/feed/menu.svg';
 import snakeIcon from '../../images/feed/snake.svg';
 import snakeDesktopIcon from '../../images/feed/snake-desktop.svg';
 import searchIcon from '../../images/feed/search.svg';
-import searchFieldIcon from '../../images/feed/search-field.svg';
 import hashIcon from '../../images/feed/hash.svg';
 import globeIcon from '../../images/feed/globe.svg';
 import expandIcon from '../../images/feed/expand.svg';
@@ -24,6 +25,7 @@ import selectedIcon from '../../images/feed/selected.svg';
 import squarePenIcon from '../../images/feed/square-pen.svg';
 import homeIcon from '../../images/feed/home.svg';
 import posts from './posts';
+import { postMatchesQuery } from './search';
 import './index.css';
 
 const languages = ['English', 'Latin'];
@@ -193,10 +195,33 @@ export default function HomePage() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const [newPostOpen, setNewPostOpen] = useState(false);
   const [activeTag, setActiveTag] = useState(null);
+  const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const feedRef = useRef(null);
+  const exploring = history.location.pathname === '/explore';
   const closeNewPost = useCallback(() => setNewPostOpen(false), []);
   const openNewPost = useCallback(() => setNewPostOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const openExplore = useCallback(() => {
+    setLanguageOpen(false);
+    setMenuOpen(false);
+    if (history.location.pathname !== '/explore') {
+      history.push('/explore');
+    }
+  }, []);
+  const goHome = useCallback(() => {
+    setActiveTag(null);
+    setLanguageOpen(false);
+    setMenuOpen(false);
+    if (history.location.pathname !== '/') {
+      history.push('/');
+      return;
+    }
+
+    if (feedRef.current) {
+      feedRef.current.scrollTop = 0;
+    }
+  }, []);
   const toggleLanguage = useCallback(
     () => setLanguageOpen(open => !open),
     [],
@@ -205,14 +230,19 @@ export default function HomePage() {
     setLanguage(name);
     setLanguageOpen(false);
   }, []);
-  const visiblePosts = activeTag
-    ? posts.filter(post => postMatchesTag(post, activeTag))
-    : posts;
+  const trimmedQuery = query.trim().toLowerCase();
+  const visiblePosts = posts.filter(post => {
+    if (trimmedQuery) {
+      return postMatchesQuery(post, trimmedQuery);
+    }
+
+    return !activeTag || postMatchesTag(post, activeTag);
+  });
 
   return (
     <main className="screen">
       <Helmet titleTemplate="%s" defaultTitle="Discover">
-        <title>Discover</title>
+        <title>{exploring ? 'Explore' : 'Discover'}</title>
       </Helmet>
       <aside className="rail">
         <img src={snakeDesktopIcon} alt="" />
@@ -226,62 +256,77 @@ export default function HomePage() {
         <NewPostButton onClick={openNewPost} />
       </aside>
       <div className="phone">
-        <header className="header">
-          <div className="controls">
-            <button
-              className="icon-button"
-              type="button"
-              aria-label="Menu"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen(true)}
-            >
-              <img src={menuIcon} alt="" />
-            </button>
-            <img src={snakeIcon} alt="" />
-            <button
-              className="icon-button icon-button--end"
-              type="button"
-              aria-label="Search"
-            >
-              <img src={searchIcon} alt="" />
-            </button>
-          </div>
-          <div className="tabs" role="tablist" aria-label="Feeds">
-            <button
-              className="tab"
-              type="button"
-              role="tab"
-              aria-selected="true"
-            >
-              Discover
-              <span className="active-indicator" />
-            </button>
-            <button
-              className="tab"
-              type="button"
-              role="tab"
-              aria-selected="false"
-              aria-label="Feeds"
-            >
-              <img src={hashIcon} alt="" />
-            </button>
-          </div>
-        </header>
-        <div className="feed">
-          {visiblePosts.map(post => (
-            <Post
-              key={post.id}
-              graffiti={post.graffiti}
-              image={post.image}
-              imageAlt={post.imageAlt}
-              comments={post.comments}
-              likes={post.likes}
-              avatar={post.avatar}
-              language={language}
-            />
-          ))}
-        </div>
-        <NewPostButton fab onClick={openNewPost} />
+        {exploring ? (
+          <ExplorePage
+            menuOpen={menuOpen}
+            onOpenMenu={() => setMenuOpen(true)}
+            language={language}
+          />
+        ) : (
+          <>
+            <header className="header">
+              <div className="controls">
+                <button
+                  className="icon-button"
+                  type="button"
+                  aria-label="Menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen(true)}
+                >
+                  <img src={menuIcon} alt="" />
+                </button>
+                <img src={snakeIcon} alt="" />
+                <button
+                  className="icon-button icon-button--end"
+                  type="button"
+                  aria-label="Search"
+                  onClick={openExplore}
+                >
+                  <img src={searchIcon} alt="" />
+                </button>
+              </div>
+              <div className="tabs" role="tablist" aria-label="Feeds">
+                <button
+                  className="tab"
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
+                >
+                  Discover
+                  <span className="active-indicator" />
+                </button>
+                <button
+                  className="tab"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-label="Feeds"
+                >
+                  <img src={hashIcon} alt="" />
+                </button>
+              </div>
+            </header>
+            <div className="feed" ref={feedRef}>
+              {trimmedQuery && visiblePosts.length === 0 ? (
+                <SearchEmpty message="No posts match that search" />
+              ) : (
+                visiblePosts.map(post => (
+                  <Post
+                    key={post.id}
+                    graffiti={post.graffiti}
+                    image={post.image}
+                    imageAlt={post.imageAlt}
+                    comments={post.comments}
+                    likes={post.likes}
+                    avatar={post.avatar}
+                    language={language}
+                  />
+                ))
+              )}
+            </div>
+            <NewPostButton fab onClick={openNewPost} />
+          </>
+        )}
         <div className={menuOpen ? 'nav-drawer nav-drawer--open' : 'nav-drawer'}>
           <button
             className="nav-drawer__scrim"
@@ -314,7 +359,11 @@ export default function HomePage() {
                 onSelect={selectLanguage}
               />
               <div className="nav-drawer__divider" />
-              <button className="nav-drawer__item" type="button">
+              <button
+                className="nav-drawer__item"
+                type="button"
+                onClick={goHome}
+              >
                 <img src={homeIcon} alt="" />
                 <span>Home</span>
               </button>
@@ -322,7 +371,11 @@ export default function HomePage() {
                 <img src={hashIcon} alt="" />
                 <span>Feeds</span>
               </button>
-              <button className="nav-drawer__item" type="button">
+              <button
+                className="nav-drawer__item"
+                type="button"
+                onClick={openExplore}
+              >
                 <img src={searchIcon} alt="" />
                 <span>Explore</span>
               </button>
@@ -334,15 +387,7 @@ export default function HomePage() {
         </div>
       </div>
       <aside className="sidebar">
-        <label className="search">
-          <img src={searchFieldIcon} alt="" />
-          <input
-            className="search-input"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-          />
-        </label>
+        <SearchField value={query} onChange={setQuery} />
         <h2 className="trending-title">Trending</h2>
         <div className="tags">
           {tags.map(tag => {

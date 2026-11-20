@@ -52,6 +52,7 @@ export default function App() {
       <GlobalStyle />
       <Switch>
         <Route exact path="/" component={HomePage} />
+        <Route exact path="/explore" component={HomePage} />
         <Route path="/features" component={AppShell} />
         <Route component={NotFoundPage} />
       </Switch>

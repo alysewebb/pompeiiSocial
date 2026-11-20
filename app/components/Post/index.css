@@ -18,37 +18,10 @@
   flex-shrink: 0;
 }
 
-.post-backdrop {
+.post-avatar-image {
   display: block;
   width: 42px;
   height: 42px;
-}
-
-.post-silhouette {
-  position: absolute;
-  display: block;
-  mix-blend-mode: multiply;
-}
-
-.post-silhouette--bun {
-  top: 4px;
-  left: 4px;
-  transform: scaleY(-1) rotate(180deg);
-}
-
-.post-silhouette--profile {
-  top: 6.48px;
-  left: 7.4px;
-}
-
-.post-silhouette--veil {
-  top: 4.11px;
-  left: 3.33px;
-}
-
-.post-silhouette--beard {
-  top: 5px;
-  left: 5px;
 }
 
 .post-body {

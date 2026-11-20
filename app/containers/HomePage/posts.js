@@ -1,35 +1,27 @@
 import graffiti from '../../graffiti.json';
-import backdropUpperLeft from '../../images/feed/backdrop-upper-left.png';
-import backdropLowerRight from '../../images/feed/backdrop-lower-right.png';
-import backdropUpperRight from '../../images/feed/backdrop-upper-right.png';
-import backdropLowerLeft from '../../images/feed/backdrop-lower-left.png';
-import avatarBun from '../../images/feed/avatar-bun.svg';
-import avatarProfile from '../../images/feed/avatar-profile.svg';
-import avatarVeil from '../../images/feed/avatar-veil.svg';
-import avatarBeard from '../../images/feed/avatar-beard.svg';
+import avatarMan1 from '../../images/feed/avatars/Avatar · Man 1.svg';
+import avatarMan2 from '../../images/feed/avatars/Avatar - Man 2.svg';
+import avatarMan3 from '../../images/feed/avatars/Avatar - Man 3.svg';
+import avatarMan4 from '../../images/feed/avatars/Avatar - Man 4.svg';
+import avatarMan5 from '../../images/feed/avatars/Avatar - Man 5.svg';
+import avatarSoldier from '../../images/feed/avatars/Avatar - Soldier.svg';
+import avatarWoman1 from '../../images/feed/avatars/Avatar - Woman 1.svg';
+import avatarWoman2 from '../../images/feed/avatars/Avatar - Woman 2.svg';
 
 const avatars = [
-  {
-    backdrop: backdropUpperLeft,
-    silhouette: avatarBun,
-    placement: 'bun',
-  },
-  {
-    backdrop: backdropLowerRight,
-    silhouette: avatarProfile,
-    placement: 'profile',
-  },
-  {
-    backdrop: backdropUpperRight,
-    silhouette: avatarVeil,
-    placement: 'veil',
-  },
-  {
-    backdrop: backdropLowerLeft,
-    silhouette: avatarBeard,
-    placement: 'beard',
-  },
+  avatarMan1,
+  avatarMan2,
+  avatarMan3,
+  avatarMan4,
+  avatarMan5,
+  avatarSoldier,
+  avatarWoman1,
+  avatarWoman2,
 ];
+
+function randomAvatar() {
+  return avatars[Math.floor(Math.random() * avatars.length)];
+}
 
 const commentCounts = [12, 28, 6, 14];
 const likeCounts = [186, 642, 93, 128];
@@ -75,7 +67,7 @@ const posts = graffiti
     imageAlt: item.caption || englishDescription(item),
     comments: commentCounts[index % commentCounts.length],
     likes: likeCounts[index % likeCounts.length],
-    avatar: avatars[index % avatars.length],
+    avatar: randomAvatar(),
   }));
 
 export default posts;

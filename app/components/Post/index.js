@@ -117,12 +117,7 @@ function Post({ graffiti, image, imageAlt, comments, likes, avatar, language }) 
     <article className="post">
       <div className="post-content">
         <div className="post-avatar">
-          <img className="post-backdrop" src={avatar.backdrop} alt="" />
-          <img
-            className={`post-silhouette post-silhouette--${avatar.placement}`}
-            src={avatar.silhouette}
-            alt=""
-          />
+          <img className="post-avatar-image" src={avatar} alt="" />
         </div>
         <div className="post-body">
           <div className="post-location">
@@ -194,11 +189,7 @@ Post.propTypes = {
   imageAlt: PropTypes.string,
   comments: PropTypes.number.isRequired,
   likes: PropTypes.number.isRequired,
-  avatar: PropTypes.shape({
-    backdrop: PropTypes.string.isRequired,
-    silhouette: PropTypes.string.isRequired,
-    placement: PropTypes.oneOf(['bun', 'profile', 'veil', 'beard']).isRequired,
-  }).isRequired,
+  avatar: PropTypes.string.isRequired,
   language: PropTypes.oneOf(['English', 'Latin']),
 };
 

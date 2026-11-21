@@ -202,6 +202,18 @@ export default function HomePage() {
   const closeNewPost = useCallback(() => setNewPostOpen(false), []);
   const openNewPost = useCallback(() => setNewPostOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const openAbout = useCallback(() => {
+    setLanguageOpen(false);
+    setMenuOpen(false);
+    if (history.location.pathname !== '/about') {
+      history.push('/about');
+    }
+  }, []);
+  const openContact = useCallback(() => {
+    setLanguageOpen(false);
+    setMenuOpen(false);
+    history.push('/about#get-in-touch');
+  }, []);
   const openExplore = useCallback(() => {
     setLanguageOpen(false);
     setMenuOpen(false);
@@ -222,10 +234,7 @@ export default function HomePage() {
       feedRef.current.scrollTop = 0;
     }
   }, []);
-  const toggleLanguage = useCallback(
-    () => setLanguageOpen(open => !open),
-    [],
-  );
+  const toggleLanguage = useCallback(() => setLanguageOpen(open => !open), []);
   const selectLanguage = useCallback(name => {
     setLanguage(name);
     setLanguageOpen(false);
@@ -327,7 +336,9 @@ export default function HomePage() {
             <NewPostButton fab onClick={openNewPost} />
           </>
         )}
-        <div className={menuOpen ? 'nav-drawer nav-drawer--open' : 'nav-drawer'}>
+        <div
+          className={menuOpen ? 'nav-drawer nav-drawer--open' : 'nav-drawer'}
+        >
           <button
             className="nav-drawer__scrim"
             type="button"
@@ -380,8 +391,20 @@ export default function HomePage() {
                 <span>Explore</span>
               </button>
               <div className="nav-drawer__divider" />
-              <p className="nav-drawer__meta">About</p>
-              <p className="nav-drawer__meta">Contact</p>
+              <button
+                className="nav-drawer__meta"
+                type="button"
+                onClick={openAbout}
+              >
+                About
+              </button>
+              <button
+                className="nav-drawer__meta"
+                type="button"
+                onClick={openContact}
+              >
+                Contact
+              </button>
             </div>
           </div>
         </div>
@@ -410,7 +433,15 @@ export default function HomePage() {
           })}
         </div>
         <div className="sidebar-divider" />
-        <p className="sidebar-links">About&nbsp;&nbsp;·&nbsp;&nbsp;Contact</p>
+        <p className="sidebar-links">
+          <button className="sidebar-link" type="button" onClick={openAbout}>
+            About
+          </button>
+          &nbsp;&nbsp;·&nbsp;&nbsp;
+          <button className="sidebar-link" type="button" onClick={openContact}>
+            Contact
+          </button>
+        </p>
       </aside>
       {newPostOpen && <NewPostDialog onClose={closeNewPost} />}
     </main>
